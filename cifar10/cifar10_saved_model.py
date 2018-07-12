@@ -41,7 +41,7 @@ tf.app.flags.DEFINE_integer('image_size', 24,
 FLAGS = tf.app.flags.FLAGS
 
 NUM_CLASSES = 10
-NUM_TOP_CLASSES = 1
+NUM_TOP_CLASSES = 5
 
 def export():
   with tf.Graph().as_default():

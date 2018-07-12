@@ -44,13 +44,33 @@ def main(_):
     # See prediction_service.proto for gRPC request/response details.
     data = f.read()
     request = predict_pb2.PredictRequest()
-    request.model_spec.name = 'cifar10_model'
+    request.model_spec.name = 'cifar10-model'
     request.model_spec.signature_name = 'predict_images'
     request.inputs['images'].CopyFrom(
         tf.contrib.util.make_tensor_proto(data, shape=[1]))
     result = stub.Predict(request, 10.0)  # 10 secs timeout
-    print(result)
 
+    if result:
+        # inference result
+        output_scores = result.outputs['scores'].float_val
+        output_classes = result.outputs['classes'].string_val
+        print('This is a ' + output_classes[0] + '.')
+
+        # Barchart plot
+        import numpy as np
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        ind = np.arange(len(output_scores))
+        softmax = lambda x : np.exp(x)/np.sum(np.exp(x))
+        prob = softmax(output_scores)
+
+        ax.bar(ind, prob)
+        ax.set_ylabel('Probabilities')
+        ax.set_title('Probabilities by classes')
+        ax.set_xticks(ind)
+        ax.set_xticklabels(output_classes)
+        ax.legend()
+        plt.show()
 
 if __name__ == '__main__':
   tf.app.run()
